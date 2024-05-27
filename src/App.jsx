@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
+ import { useState ,useEffect } from 'react'
+// import reactLogo from './assets/react.svg'
+// import viteLogo from '/vite.svg'
+//  import './App.css'
+import ContactList from './components/ContactList/ContactList'
+import ContactForm from './components/ContactForm/ContactForm'
+import SearchBox from './components/SearchBox/SearchBox'
+import contactmass from './data/ContactList.json'
 function App() {
-  const [count, setCount] = useState(0)
+  const [phonebook, setPhonebook] = useState(() => {
+    const savedContacts = localStorage.getItem("saved-contacts");
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    if (savedContacts !== null) {
+      return JSON.parse(savedContacts);
+    }
+    return contactmass;
+  });
+
+
+useEffect(() => {
+    localStorage.setItem("saved-contacts", JSON.stringify(phonebook));
+  }, [phonebook]);
+
+
+  const [search, setSearch] = useState('')
+
+  const addCard = (newCard) => {
+      setPhonebook((prevPhone) => { return [...prevPhone, newCard] })
+  }
+
+  const delCard = (cardId) => {
+     setPhonebook((prevPhone) => { return prevPhone.filter(card => card.id !== cardId) })
+  }
+
+  const viewPhonebook = phonebook.filter((card) => 
+    card.name.toLowerCase().includes(search.toLowerCase())
   )
+  
+  
+   return (
+     <>
+       <ContactForm submit={addCard} />
+       <SearchBox value={search} onSearch={setSearch} />
+       <ContactList 
+         contactitems={viewPhonebook} onDel={delCard} />
+      
+     </>
+   )
 }
 
 export default App
